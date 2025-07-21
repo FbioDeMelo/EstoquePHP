@@ -1,26 +1,26 @@
 <?php
-session_start();
 require_once 'config/db.php';
 
-if (!isset($_SESSION['user'])) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Não autorizado']);
-    exit;
-}
-
-$setor = $_SESSION['user']['setor'];
-$limit = 20;
 $offset = isset($_GET['offset']) ? intval($_GET['offset']) : 0;
+$limit = 20;
+$setor = $_GET['setor'] ?? '';
 
+// Consulta conforme setor
 if ($setor === 'Admin') {
     $sql = "SELECT * FROM products LIMIT $limit OFFSET $offset";
-} elseif ($setor === 'Eventos') {
-    $sql = "SELECT * FROM products WHERE setor = 'Eventos' LIMIT $limit OFFSET $offset";
 } else {
-    $sql = "SELECT * FROM products WHERE setor = 'Geral' LIMIT $limit OFFSET $offset";
+    $sql = "SELECT * FROM products WHERE setor = ? LIMIT $limit OFFSET $offset";
 }
 
-$result = $conn->query($sql);
+if ($setor === 'Admin') {
+    $stmt = $conn->prepare($sql);
+} else {
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $setor);
+}
+
+$stmt->execute();
+$result = $stmt->get_result();
 
 $produtos = [];
 while ($row = $result->fetch_assoc()) {

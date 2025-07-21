@@ -10,14 +10,6 @@ if (!isset($_SESSION['user'])) {
 $nomeUsuario = $_SESSION['user']['nome'];
 $setor = $_SESSION['user']['setor'];
 
-// Consulta produtos conforme setor
-if ($setor === 'Admin') {
-    $sql = "SELECT * FROM products";
-} elseif ($setor === 'Eventos') {
-    $sql = "SELECT * FROM products WHERE setor = 'Eventos'";
-} else {
-    $sql = "SELECT * FROM products WHERE setor = 'Geral'";
-}
 $limit = 20;
 $offset = 0;
 
@@ -25,18 +17,17 @@ if ($setor === 'Admin') {
     $sql = "SELECT * FROM products LIMIT $limit OFFSET $offset";
 } elseif ($setor === 'Eventos') {
     $sql = "SELECT * FROM products WHERE setor = 'Eventos' LIMIT $limit OFFSET $offset";
+} elseif ($setor === 'Certificados') {  // aqui deve bater com o banco
+    $sql = "SELECT * FROM products WHERE setor = 'Certificados' LIMIT $limit OFFSET $offset";
 } else {
     $sql = "SELECT * FROM products WHERE setor = 'Geral' LIMIT $limit OFFSET $offset";
 }
-
 $result = $conn->query($sql);
 
 $produtos = [];
 while ($row = $result->fetch_assoc()) {
     $produtos[] = $row;
 }
-
-
 ?>
 
 <!DOCTYPE html>
@@ -44,204 +35,71 @@ while ($row = $result->fetch_assoc()) {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+   <link rel="stylesheet" href="css/style.css" />
   <title>Dashboard - Estoque</title>
-  <style>
-    :root {
-      --primary-color: #007bff;
-      --primary-hover: #0056b3;
-      --bg-color: #f4f6f9;
-      --white: #ffffff;
-      --gray-light: #f8f9fa;
-      --gray-medium: #dee2e6;
-      --text-color: #333;
-      --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: var(--font-main);
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      line-height: 1.6;
-      padding: 1rem;
-    }
-
-    .container {
-      max-width: 1100px;
-      margin: 2rem auto;
-      background: var(--white);
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      padding: 2rem;
-    }
-
-    header {
-      margin-bottom: 2rem;
-    }
-
-    h2 {
-      font-size: 1.75rem;
-      margin-bottom: 0.5rem;
-    }
-
-    p {
-      font-size: 1rem;
-      color: #555;
-    }
-
-    nav {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      margin-top: 1.5rem;
-      background-color: var(--gray-light);
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-    }
-
-    nav a {
-      color: var(--primary-color);
-      text-decoration: none;
-      font-weight: 500;
-      transition: color 0.3s ease;
-    }
-
-    nav a:hover {
-      color: var(--primary-hover);
-      text-decoration: underline;
-    }
-
-    .search-section {
-      margin-bottom: 1.5rem;
-    }
-
-    .search-section input[type="text"] {
-      width: 100%;
-      max-width: 400px;
-      padding: 0.6rem 1rem;
-      font-size: 1rem;
-      border: 1px solid var(--gray-medium);
-      border-radius: 6px;
-    }
-
-    ul#sugestoes {
-      list-style: none;
-      padding: 0;
-      border: 1px solid var(--gray-medium);
-      margin-top: 0.25rem;
-      border-top: none;
-      border-radius: 0 0 6px 6px;
-      max-height: 200px;
-      overflow-y: auto;
-      background: var(--white);
-      z-index: 10;
-      display: none;
-      position: absolute;
-    }
-
-    ul#sugestoes li {
-      padding: 0.6rem 1rem;
-      cursor: pointer;
-    }
-
-    ul#sugestoes li:hover {
-      background-color: #f0f0f0;
-    }
-
-    h3 {
-      margin-top: 1.5rem;
-      font-size: 1.25rem;
-      color: black;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1rem;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-    }
-
-    th,
-    td {
-      padding: 1rem;
-      text-align: center;
-    }
-
-    th {
-      background-color: var(--primary-color);
-      color: var(--white);
-    }
-
-    tr:hover {
-      background-color: #f9f9f9;
-    }
-
-    a.button {
-      display: inline-block;
-      margin-top: 1rem;
-      padding: 0.5rem 1rem;
-      background-color: #ff0000ff;
-      color: var(--white);
-      border-radius: 6px;
-      text-decoration: none;
-      font-weight: 500;
-    }
-
-    a.button:hover {
-      background-color: #c50404ff;
-    }
-  a.buttton {
-      display: inline-block;
-      margin-top: 1rem;
-      padding: 0.5rem 1rem;
-      background-color: #07f723ff;
-      color: var(--white);
-      border-radius: 6px;
-      text-decoration: none;
-      font-weight: 500;
-    }
-
-    a.buttton:hover {
-      background-color: #01cc19ff;
-    }
-    
-    @media (max-width: 600px) {
-      nav {
-        flex-direction: column;
-      }
-
-      .search-section input[type="text"] {
-        width: 100%;
-      }
-    }
-  </style>
-</head>
+<head>
 <body>
-  <div class="container">
-    <header>
-          <nav>
-      <a href="movimentar_estoque.php">Movimentar Estoque</a>
-      <?php if ($setor === 'Admin'): ?>
-        <a href="add_user.php">Cadastrar Novo Usuário</a>
-        <a href="manage_users.php">Gerenciar Usuários</a>
-      <?php endif; ?>
+<nav class="navbar">
+        <a href="https://faculdadelibano.edu.br/" class="navbar-brand">
+            <img src="https://faculdadelibano.edu.br/_next/image?url=%2Froot%2Flogo-website-colorida.webp&w=384&q=75" alt="Faculdade Libano" class="navbar-logo">
+        </a>
+        <div class="hamburger" onclick="toggleMenu()">
+            <i class="fas fa-bars"></i>
+        </div>
+        <ul class="navbar-links">
+        </ul>
+        
+<div class="user-menu">
+  <button class="avatar-btn" aria-haspopup="true" aria-expanded="false" aria-controls="userDropdown">
+    <img src="img/user.png" alt="Avatar do usuário" class="avatar" />
+  </button>
+  <ul id="userDropdown" class="dropdown-menu">
+    <li><a href="#"><?= htmlspecialchars($nomeUsuario) ?></a></li>
+  </ul>
+</div>
     </nav>
-    </header>
-      <h2>Olá, <strong><?= htmlspecialchars($nomeUsuario) ?></strong>! Bem-vindo ao sistema!</h2>
-      <p>Seu setor: <strong><?= htmlspecialchars($setor) ?></strong></p>
-<center>
+
+<!-- Sidebar -->
+<nav class="menu">
+  <a href="dashboard.php" class="menu-item">
+    <i class="fas fa-home"></i>
+    <span class="text">Início</span>
+  </a>
+  <a href="movimentar_estoque.php" class="menu-item">
+    <i class="fas fa-boxes"></i>
+    <span class="text">Retirada de Item</span>
+  </a>
+    <a href="graficos.php" class="menu-item">
+    <i class="fas fa-boxes"></i>
+    <span class="text">Graficos</span>
+  </a>
+  <?php if ($setor === 'Admin'): ?>
+    <a href="add_user.php" class="menu-item">
+      <i class="fas fa-user-plus"></i>
+      <span class="text">Cadastrar Usuário</span>
+    </a>
+    <a href="manage_users.php" class="menu-item">
+      <i class="fas fa-users-cog"></i>
+      <span class="text">Gerenciar Usuários</span>
+    </a>
+    <a href="movimentacoes.php" class="menu-item">
+      <i class="fas fa-clipboard-list"></i>
+      <span class="text">Movimentações</span>
+    </a>
+  <?php endif; ?>
+  <a href="logout.php" class="menu-item">
+    <i class="fas fa-sign-out-alt"></i>
+    <span class="text">Sair</span>
+  </a>
+</nav>
+      <h2>Olá, <strong><?= htmlspecialchars($nomeUsuario) ?></strong>! Bem-vindo ao sistema! Seu setor: <strong><?= htmlspecialchars($setor) ?></strong></h2>
+      <center>
     <section class="search-section">
     <h3>Pesquisar Produto</h3>  <input type="text" id="campoBusca" placeholder="🔍 Digite o nome do produto..." aria-label="Campo de busca de produto">
-      <ul id="sugestoes" role="listbox"></ul>
             <a href="add_product.php" class="buttton">+ Adicionar Produto</a>
       </center>
     </section>
+    <center>
     <section>
       <table aria-label="Tabela de estoque">
         <thead>
@@ -252,6 +110,7 @@ while ($row = $result->fetch_assoc()) {
     <th>Ações</th>
   </tr>
 </thead>
+      </center>
         <tbody>
 <?php foreach ($produtos as $item): ?>
   <tr data-produto="<?= htmlspecialchars($item['nome']) ?>">
@@ -271,23 +130,33 @@ while ($row = $result->fetch_assoc()) {
     </section>
     <button id="carregarMais" style="margin-top: 1rem; padding: 0.6rem 1.2rem; font-size: 1rem; cursor: pointer;">Carregar Mais</button>
 
-  </div>
-   <script>
-  let offset = <?= count($produtos) ?>; // começa no total carregado (normalmente 20)
-  const limit = 20;
-  const setor = <?= json_encode($setor) ?>;
+<script>
+    function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('collapsed');
+  }
+  const campoBusca = document.getElementById('campoBusca');
   const carregarMaisBtn = document.getElementById('carregarMais');
   const tbody = document.querySelector('table tbody');
+  let offset = <?= count($produtos) ?>;
+  const limit = 20;
+  const setor = <?= json_encode($setor) ?>;
 
-  carregarMaisBtn.addEventListener('click', () => {
-    carregarMaisBtn.disabled = true;
-    carregarMaisBtn.textContent = 'Carregando...';
+  // Busca dinâmica no banco de dados conforme digita
+  campoBusca.addEventListener('input', () => {
+    const termo = campoBusca.value.trim();
 
-    fetch(`load_products.php?offset=${offset}`)
-      .then(response => response.json())
+   if (termo.length < 2) {
+  return; 
+}
+
+    fetch(`search_product.php?termo=${encodeURIComponent(termo)}&setor=${encodeURIComponent(setor)}`)
+      .then(res => res.json())
       .then(data => {
+        tbody.innerHTML = ''; // Limpa a tabela
+
         if (data.length === 0) {
-          // Não tem mais produtos
+          tbody.innerHTML = '<tr><td colspan="4"> ☹️ Nenhum produto encontrado.</td></tr>';
           carregarMaisBtn.style.display = 'none';
           return;
         }
@@ -295,7 +164,6 @@ while ($row = $result->fetch_assoc()) {
         data.forEach(item => {
           const tr = document.createElement('tr');
           tr.setAttribute('data-produto', item.nome);
-
           tr.innerHTML = `
             <td>${item.nome}</td>
             <td>${item.quantidade}</td>
@@ -306,7 +174,39 @@ while ($row = $result->fetch_assoc()) {
               </center>
             </td>
           `;
+          tbody.appendChild(tr);
+        });
 
+        carregarMaisBtn.style.display = 'none'; // Oculta botão ao buscar
+      });
+  });
+
+  // Botão "Carregar Mais"
+  carregarMaisBtn.addEventListener('click', () => {
+    carregarMaisBtn.disabled = true;
+    carregarMaisBtn.textContent = 'Carregando...';
+
+    fetch(`load_products.php?offset=${offset}&setor=${encodeURIComponent(setor)}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.length === 0) {
+          carregarMaisBtn.style.display = 'none';
+          return;
+        }
+
+        data.forEach(item => {
+          const tr = document.createElement('tr');
+          tr.setAttribute('data-produto', item.nome);
+          tr.innerHTML = `
+            <td>${item.nome}</td>
+            <td>${item.quantidade}</td>
+            <td>${item.setor}</td>
+            <td>
+              <center>
+                <a href="movimentar_estoque.php?id=${item.id}" class="button" style="padding: 0.3rem 0.6rem; font-size: 0.9rem;">Remover</a>
+              </center>
+            </td>
+          `;
           tbody.appendChild(tr);
         });
 

@@ -47,6 +47,7 @@ $senha = $_POST['senha'];
             <option value="Admin">Admin</option>
             <option value="Eventos">Eventos</option>
             <option value="Geral">Geral</option>
+            <option value="certificados">Certificados</option>
         </select><br><br>
 
         <label>Status:</label><br>

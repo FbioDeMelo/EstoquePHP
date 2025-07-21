@@ -66,6 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php if ($setor_usuario == 'Admin'): ?>
             <option value="Eventos">Eventos</option>
             <option value="Geral">Geral</option>
+            <option value="certificados">Certificados</option>
         <?php else: ?>
             <option value="<?= $setor_usuario ?>"><?= $setor_usuario ?></option>
         <?php endif; ?>

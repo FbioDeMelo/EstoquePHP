@@ -54,9 +54,15 @@ if ($setor !== 'Admin') $stmt->bind_param("s", $setor);
 $stmt->execute();
 $produtos = $stmt->get_result();
 ?>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
 <h2>Movimentar Estoque - <?= htmlspecialchars($setor) ?></h2>
-
 <form method="POST">
     <label>Produto:</label>
     <select name="produto_id" required>
@@ -66,7 +72,6 @@ $produtos = $stmt->get_result();
             </option>
         <?php endwhile; ?>
     </select><br><br>
-
 <label>Tipo de Movimento:</label>
 <input type="hidden" name="tipo" value="saida">
 <p>Tipo: Saída</p>
@@ -78,3 +83,5 @@ $produtos = $stmt->get_result();
 </form>
 
 <p><a href="dashboard.php">← Voltar ao Dashboard</a></p>
+</body>
+</html>
