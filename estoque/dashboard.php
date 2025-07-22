@@ -54,11 +54,10 @@ while ($row = $result->fetch_assoc()) {
     <img src="img/user.png" alt="Avatar do usuário" class="avatar" />
   </button>
   <ul id="userDropdown" class="dropdown-menu">
-    <li><a href="#"><?= htmlspecialchars($nomeUsuario) ?></a></li>
+    <li><a href="#">Você está logado como:<strong><?= htmlspecialchars($nomeUsuario) ?></strong></a></li>
   </ul>
 </div>
     </nav>
-
 <!-- Sidebar -->
 <nav class="menu">
   <a href="dashboard.php" class="menu-item">
@@ -71,7 +70,7 @@ while ($row = $result->fetch_assoc()) {
   </a>
     <a href="graficos.php" class="menu-item">
     <i class="fas fa-boxes"></i>
-    <span class="text">Graficos</span>
+    <span class="text">Gráficos</span>
   </a>
   <?php if ($setor === 'Admin'): ?>
     <a href="add_user.php" class="menu-item">
@@ -95,7 +94,7 @@ while ($row = $result->fetch_assoc()) {
       <h2>Olá, <strong><?= htmlspecialchars($nomeUsuario) ?></strong>! Bem-vindo ao sistema! Seu setor: <strong><?= htmlspecialchars($setor) ?></strong></h2>
       <center>
     <section class="search-section">
-    <h3>Pesquisar Produto</h3>  <input type="text" id="campoBusca" placeholder="🔍 Digite o nome do produto..." aria-label="Campo de busca de produto">
+    <h3>Pesquisar Produto</h3>  <input type="text" id="campoBusca" placeholder="🔍 Digite o nome do produto cadastrado..." aria-label="Campo de busca de produto">
             <a href="add_product.php" class="buttton">+ Adicionar Produto</a>
       </center>
     </section>
@@ -124,12 +123,10 @@ while ($row = $result->fetch_assoc()) {
     </td>
   </tr>
 <?php endforeach; ?>
-
         </tbody>
       </table>
     </section>
     <button id="carregarMais" style="margin-top: 1rem; padding: 0.6rem 1.2rem; font-size: 1rem; cursor: pointer;">Carregar Mais</button>
-
 <script>
     function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
@@ -149,18 +146,15 @@ while ($row = $result->fetch_assoc()) {
    if (termo.length < 2) {
   return; 
 }
-
     fetch(`search_product.php?termo=${encodeURIComponent(termo)}&setor=${encodeURIComponent(setor)}`)
       .then(res => res.json())
       .then(data => {
-        tbody.innerHTML = ''; // Limpa a tabela
-
+        tbody.innerHTML = '';
         if (data.length === 0) {
           tbody.innerHTML = '<tr><td colspan="4"> ☹️ Nenhum produto encontrado.</td></tr>';
           carregarMaisBtn.style.display = 'none';
           return;
         }
-
         data.forEach(item => {
           const tr = document.createElement('tr');
           tr.setAttribute('data-produto', item.nome);
@@ -177,11 +171,10 @@ while ($row = $result->fetch_assoc()) {
           tbody.appendChild(tr);
         });
 
-        carregarMaisBtn.style.display = 'none'; // Oculta botão ao buscar
+        carregarMaisBtn.style.display = 'none';
       });
   });
 
-  // Botão "Carregar Mais"
   carregarMaisBtn.addEventListener('click', () => {
     carregarMaisBtn.disabled = true;
     carregarMaisBtn.textContent = 'Carregando...';

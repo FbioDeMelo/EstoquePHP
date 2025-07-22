@@ -1,0 +1,156 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body, html {
+  font-family: 'Segoe UI', sans-serif;
+  background: #d4e4ff;
+  height: 100vh;
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.login-box {
+  display: flex;
+  background: white;
+  width: 95%;
+  max-width: 960px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.form-section {
+  flex: 1;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: #fff;
+}
+
+.logo {
+  width: 140px;
+  margin-bottom: 20px;
+}
+
+h2 {
+  margin-bottom: 10px;
+  font-size: 22px;
+  color: #111;
+}
+
+p {
+  margin-bottom: 20px;
+  color: #444;
+  font-size: 14px;
+}
+
+form input {
+  padding: 12px;
+  margin-bottom: 15px;
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.btn.submit {
+    display: inline-block;
+  padding: 12px;
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn.submit:hover {
+  background-color: #005bd1;
+}
+
+.register-text {
+  font-size: 14px;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.register-text a {
+  color: #0070f3;
+  text-decoration: none;
+}
+
+.forgot-password {
+  font-weight: bold;
+  display: inline-block;
+  margin-bottom: 10px;
+}
+
+.error {
+  color: red;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.info-section {
+  flex: 1;
+  padding: 40px;
+  background: linear-gradient(to bottom right, #005ce6, #007bff);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.info-section h2 {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.info-section p {
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.carousel img {
+  width: 100%;
+  border-radius: 10px;
+}
+
+.dots {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.dot {
+  height: 10px;
+  width: 10px;
+  margin: 0 3px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot.active {
+  background-color: white;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .login-box {
+    flex-direction: column;
+  }
+
+  .info-section {
+    display: none;
+  }
+}

@@ -4,11 +4,7 @@ require_once 'config/db.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
-    $senha = $_POST['senha']; // ou use md5($_POST['senha']) se estiver salvando com md5
-
-    // IMPORTANTE: use md5 só se no banco a senha estiver gravada com md5
-    // $senha = md5($_POST['senha']);
-
+    $senha = $_POST['senha']; 
     $stmt = $conn->prepare("SELECT * FROM users WHERE email = ? AND senha = ?");
     $stmt->bind_param("ss", $email, $senha);
     $stmt->execute();
@@ -29,19 +25,73 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 ?>
-
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-    <title>Login - Estoque</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Estoque</title>
+  <link rel="stylesheet" href="css/login.css" />
 </head>
 <body>
-    <h2>Login</h2>
-    <?php if (isset($erro)) echo "<p style='color:red;'>$erro</p>"; ?>
-    <form method="POST">
-        <input type="email" name="email" placeholder="Email" required><br>
-        <input type="password" name="senha" placeholder="Senha" required><br>
-        <button type="submit">Entrar</button>
-    </form>
+  <div class="container">
+    <div class="login-box">
+      <div class="form-section">
+        <img src="https://institutolibano.com.br/_next/image?url=%2Froot%2Flogo-website-colorida.webp&w=384&q=75" alt="Logo" class="logo" />
+        <h2>Acesse o sistema de estoque</h2>
+        <p>Digite suas credenciais para continuar.</p>
+
+        <?php if (isset($erro)) echo "<p class='error'>$erro</p>"; ?>
+
+        <form method="POST">
+          <label for="email">E-mail</label>
+          <input type="email" name="email" id="email" placeholder="seuemail@exemplo.com" required />
+
+          <label for="senha">Senha</label>
+          <input type="password" name="senha" id="senha"  required />
+
+          <button type="submit" class="btn submit">Entrar</button>
+        </form>
+
+        <div class="register-text">
+          <a href="recuperar.php" class="forgot-password">Esqueceu a senha?</a><br />
+        </div>
+      </div>
+
+      <div class="info-section">
+        <div class="carousel">
+          <img src="img/teste02.png" />
+          <div class="dots">
+            <span class="dot active"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
+<script>
+  const images = [
+    'img/Gemini_Generated_Image_fiicjmfiicjmfiic.png',
+    'img/Teste02.png',
+    'img/teste03.png'
+  ];
+
+  let currentIndex = 0;
+  const carouselImage = document.querySelector('.carousel img');
+  const dots = document.querySelectorAll('.dot');
+
+  function updateCarousel() {
+    carouselImage.src = images[currentIndex];
+
+    dots.forEach((dot, index) => {
+      dot.classList.toggle('active', index === currentIndex);
+    });
+
+    currentIndex = (currentIndex + 1) % images.length;
+  }
+
+  setInterval(updateCarousel, 3000);
+</script>
 </html>

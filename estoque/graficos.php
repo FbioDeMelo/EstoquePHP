@@ -8,7 +8,9 @@ if (!isset($_SESSION['user'])) {
 }
 
 $setor = $_SESSION['user']['setor'];
-$limite = isset($_GET['limite']) ? intval($_GET['limite']) : 10;
+$limite = $_GET['limite'] ?? 10;
+$filtroSetor = $_GET['filtroSetor'] ?? '';
+$isAll = $limite === 'all';
 
 $params = [];
 $innerSql = "
@@ -19,9 +21,18 @@ $innerSql = "
     JOIN products p ON m.produto_id = p.id
 ";
 
+$conditions = [];
+
 if ($setor !== 'Admin') {
-    $innerSql .= " WHERE p.setor = ?";
+    $conditions[] = "p.setor = ?";
     $params[] = $setor;
+} elseif (!empty($filtroSetor)) {
+    $conditions[] = "p.setor = ?";
+    $params[] = $filtroSetor;
+}
+
+if ($conditions) {
+    $innerSql .= " WHERE " . implode(" AND ", $conditions);
 }
 
 $innerSql .= " GROUP BY p.nome";
@@ -30,20 +41,23 @@ $sql = "
     SELECT nome, entrada, saida
     FROM ( $innerSql ) AS t
     ORDER BY (entrada + saida) DESC
-    LIMIT ?
 ";
-$params[] = $limite;
+
+if (!$isAll) {
+    $sql .= " LIMIT ?";
+    $params[] = intval($limite);
+}
 
 $stmt = $conn->prepare($sql);
 if (!$stmt) {
     die("Erro ao preparar a consulta: " . $conn->error);
 }
 
-$types = '';
-foreach ($params as $p) {
-    $types .= is_int($p) ? 'i' : 's';
+if (!empty($params)) {
+    $types = str_repeat('s', count($params) - ($isAll ? 0 : 1)) . ($isAll ? '' : 'i');
+    $stmt->bind_param($types, ...$params);
 }
-$stmt->bind_param($types, ...$params);
+
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -54,7 +68,7 @@ while ($row = $result->fetch_assoc()) {
     $saidas[] = $row['saida'];
 }
 
-// Gráfico por setor (apenas para Admin)
+// Gráfico por setor (Admin)
 $setores = [];
 if ($setor === 'Admin') {
     $sql2 = "
@@ -88,15 +102,15 @@ if ($setor === 'Admin') {
 </nav>
 
 <nav class="menu">
-    <a href="dashboard.php" class="menu-item"><i class="fas fa-home"></i><span class="text">Início</span></a>
-    <a href="movimentar_estoque.php" class="menu-item"><i class="fas fa-boxes"></i><span class="text">Retirada de Item</span></a>
-    <a href="graficos.php" class="menu-item"><i class="fas fa-chart-bar"></i><span class="text">Gráficos</span></a>
+    <a href="dashboard.php" class="menu-item"> Início</a>
+    <a href="movimentar_estoque.php" class="menu-item"> Retirada de Item</a>
+    <a href="graficos.php" class="menu-item"> Gráficos</a>
     <?php if ($setor === 'Admin'): ?>
-        <a href="add_user.php" class="menu-item"><i class="fas fa-user-plus"></i><span class="text">Cadastrar Usuário</span></a>
-        <a href="manage_users.php" class="menu-item"><i class="fas fa-users-cog"></i><span class="text">Gerenciar Usuários</span></a>
-        <a href="movimentacoes.php" class="menu-item"><i class="fas fa-clipboard-list"></i><span class="text">Movimentações</span></a>
+        <a href="add_user.php" class="menu-item"> Cadastrar Usuário</a>
+        <a href="manage_users.php" class="menu-item"> Gerenciar Usuários</a>
+        <a href="movimentacoes.php" class="menu-item"> Movimentações</a>
     <?php endif; ?>
-    <a href="logout.php" class="menu-item"><i class="fas fa-sign-out-alt"></i><span class="text">Sair</span></a>
+    <a href="logout.php" class="menu-item"> Sair</a>
 </nav>
 
 <div class="container">
@@ -107,26 +121,43 @@ if ($setor === 'Admin') {
             <option value="10" <?= $limite == 10 ? 'selected' : '' ?>>Top 10</option>
             <option value="20" <?= $limite == 20 ? 'selected' : '' ?>>Top 20</option>
             <option value="50" <?= $limite == 50 ? 'selected' : '' ?>>Top 50</option>
+            <option value="all" <?= $limite === 'all' ? 'selected' : '' ?>>Todos os Itens</option>
         </select>
+
+        <?php if ($setor === 'Admin'): ?>
+            <label for="filtroSetor">Setor:</label>
+            <select name="filtroSetor" id="filtroSetor" onchange="this.form.submit()">
+                <option value="">Todos</option>
+                <?php
+                $resSetores = $conn->query("SELECT DISTINCT setor FROM products");
+                while ($row = $resSetores->fetch_assoc()):
+                    $selected = $filtroSetor === $row['setor'] ? 'selected' : '';
+                ?>
+                    <option value="<?= $row['setor'] ?>" <?= $selected ?>><?= $row['setor'] ?></option>
+                <?php endwhile; ?>
+            </select>
+        <?php endif; ?>
     </form>
 
-    <canvas id="grafico"></canvas>
+    <canvas id="grafico" height="80"></canvas>
 
     <?php if ($setor === 'Admin'): ?>
-        <h3>Por Setor (Entradas)</h3>
-        <canvas id="setorGrafico"></canvas>
+        <h3>📈 Entradas por Setor</h3>
+        <canvas id="setorGrafico" height="80"></canvas>
         <div class="btn-group">
             <a href="exportar_csv.php" class="btn btn-exportar">📥 Exportar todos os dados (CSV)</a>
             <button class="btn btn-download" onclick="baixarGraficoPDF()">📥 Baixar Ambos os Gráficos (PDF)</button>
         </div>
     <?php endif; ?>
 
+
+
     <a href="dashboard.php" class="link-voltar">← Voltar ao painel</a>
 </div>
 
 <script>
 const ctx = document.getElementById('grafico').getContext('2d');
-const grafico = new Chart(ctx, {
+new Chart(ctx, {
     type: 'bar',
     data: {
         labels: <?= json_encode($nomes) ?>,
@@ -150,6 +181,29 @@ const grafico = new Chart(ctx, {
         }
     }
 });
+
+<?php if ($setor === 'Admin'): ?>
+const setorCtx = document.getElementById('setorGrafico').getContext('2d');
+new Chart(setorCtx, {
+    type: 'pie',
+    data: {
+        labels: <?= json_encode(array_keys($setores)) ?>,
+        datasets: [{
+            data: <?= json_encode(array_values($setores)) ?>,
+            backgroundColor: ['#4caf50', '#ff9800', '#2196f3', '#9c27b0', '#ff5722', '#607d8b', '#795548']
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: { padding: 15 }
+            }
+        }
+    }
+});
+<?php endif; ?>
 
 async function baixarGraficoPDF() {
     const { jsPDF } = window.jspdf;
@@ -179,29 +233,6 @@ async function baixarGraficoPDF() {
 
     pdf.save('graficos_estoque.pdf');
 }
-
-<?php if ($setor === 'Admin'): ?>
-const setorCtx = document.getElementById('setorGrafico').getContext('2d');
-new Chart(setorCtx, {
-    type: 'pie',
-    data: {
-        labels: <?= json_encode(array_keys($setores)) ?>,
-        datasets: [{
-            data: <?= json_encode(array_values($setores)) ?>,
-            backgroundColor: ['#4caf50', '#ff9800', '#2196f3', '#9c27b0', '#ff5722', '#607d8b', '#795548']
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: {
-                position: 'bottom',
-                labels: { padding: 15 }
-            }
-        }
-    }
-});
-<?php endif; ?>
 </script>
 </body>
 </html>

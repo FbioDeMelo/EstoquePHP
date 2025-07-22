@@ -252,6 +252,7 @@ thead th, tbody td {
   border-bottom: 1px solid #ddd;
   font-size: 0.95rem;
   vertical-align: middle;
+  text-align: center;
 }
 
 tbody tr:hover {
